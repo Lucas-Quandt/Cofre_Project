@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const ContaRepository = require('../repositories/contaRepository');
 const bcrypt = require('bcrypt'); // 👈 Importação da biblioteca
 
@@ -36,8 +37,31 @@ const login = async (req, res) => {
         return res.status(401).json({ mensagem: 'Credenciais inválidas.' });
     }
 
+    const token = jwt.sign(
+        { id: conta.id }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: '1h' }
+    );
+
     // 3. Sucesso!
-    res.json({ mensagem: 'Login realizado com sucesso! Bem-vindo(a).' });
+    res.json({ mensagem: 'Login realizado com sucesso! Bem-vindo(a).', token: token });
 };
 
-module.exports = { registrar, login };
+const verPerfil = async (req, res) => {
+    try {
+        const id = req.usuario_id;
+        
+        const dadosUsuario = await ContaRepository.buscarContaPorId(id);
+
+        if (!dadosUsuario) {
+            return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+        }
+        
+        res.json(dadosUsuario);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensagem: 'Erro interno no servidor.' });
+    }
+};
+
+module.exports = { registrar, login, verPerfil };

@@ -14,4 +14,12 @@ const buscarContaPorEmail = async (email) => {
     return resultado.rows[0];
 };
 
-module.exports = { criarConta, buscarContaPorEmail };
+const buscarContaPorId = async (id) => {
+    const resultado = await pool.query(
+        'SELECT id, nome, email FROM contas WHERE id = $1',
+        [id]
+    );
+    return resultado.rows[0];
+};
+
+module.exports = { criarConta, buscarContaPorEmail, buscarContaPorId };
